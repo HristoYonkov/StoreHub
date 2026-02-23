@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import ProductCard from '@/components/ProductCard.vue';
+import SortDropdown from '@/components/SortDropdown.vue';
 import { useProductsStore } from '@/stores/products';
-import { computed, onMounted } from 'vue';
+import { SortOption } from '@/types/product';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router'
 
 const route = useRoute();
 const productsStore = useProductsStore();
 const category = computed(() => (route.params.category as string) || 'bags');
+const sortOption = ref<SortOption>('name-asc');
 
 onMounted(() => productsStore.load());
 
@@ -40,8 +43,21 @@ const categoryProducts = computed(() => productsStore.byCategory(category.value)
 
       <!-- Content -->
       <div v-else class="flex flex-col lg:flex-row gap-8">
-        <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
-          <ProductCard v-for="product in categoryProducts.value" :key="product.id" :product="product" />
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <p class="text-gray-700">
+              Showing <strong>5</strong> of <strong>20</strong>
+              products
+            </p>
+            <div class="flex items-center gap-3">
+              <span class="text-gray-600 font-medium">Sort by:</span>
+              <SortDropdown v-model="sortOption" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+            <ProductCard v-for="product in categoryProducts.value" :key="product.id" :product="product" />
+          </div>
         </div>
       </div>
 

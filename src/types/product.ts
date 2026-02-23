@@ -4,9 +4,11 @@ export interface Product {
   name: string;
   shortDesc: string;
   price: number;
-  discountPrice?: number;     
+  discountPrice?: number;
   image: string;
   color: string;
-  rating: number;             
+  rating: number;
   stock?: number;
 }
+
+export type SortOption = 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc';
