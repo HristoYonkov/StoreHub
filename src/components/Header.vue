@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
+import SearchDropdown from './SearchDropdown.vue';
 
 const props = defineProps<{
   categories: string[]
