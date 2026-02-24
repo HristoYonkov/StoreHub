@@ -8,6 +8,12 @@ import { useProductsStore } from '@/stores/products';
 import { useToastStore } from '@/stores/toast';
 import { Product, ProductFilters, SortOption } from '@/types/product';
 import { computed, onMounted, ref, watch } from 'vue';
+import {
+  applyColorFilter,
+  applyRatingFilter,
+  applyPriceFilter,
+  getPriceRange,
+} from '@/utils/productFilters';
 
 const productsStore = useProductsStore();
 const props = defineProps<{ category: string }>();
@@ -16,7 +22,6 @@ const PAGE_SIZE = 5;
 const currentPage = ref(1);
 const cartStore = useCartStore();
 const toastStore = useToastStore();
-
 
 onMounted(() => productsStore.load());
 
@@ -27,10 +32,6 @@ const categoryMaxPrice = computed(() => {
   return prices.length ? Math.max(...prices) : 0
 });
 
-const availableColors = computed(() =>
-  [...new Set(categoryProducts.value.value.map(p => p.color))].sort()
-);
-
 const filters = ref<ProductFilters>({
   colors: [],
   priceMin: 0,
@@ -38,51 +39,38 @@ const filters = ref<ProductFilters>({
   minRating: 1
 });
 
-// Dynamic min and max price based on color and rating filters (before price filter)
-const dynamicMinPrice = computed(() => {
-  let result = categoryProducts.value.value;
+// Available colors based on rating filter
+const availableColors = computed(() =>
+  [...new Set(categoryProducts.value.value.map(p => p.color))].sort()
+);
 
-  if (filters.value.colors.length > 0) {
-    result = result.filter(p => filters.value.colors.includes(p.color))
-  };
+// Dynamic price range based on color and rating filters
+const dynamicPriceRange = computed(() => {
+  let result = categoryProducts.value.value
+  result = applyColorFilter(result, filters.value.colors)
+  result = applyRatingFilter(result, filters.value.minRating ?? 1)
 
-  result = result.filter(p => p.rating >= (filters.value.minRating ?? 1));
-
-  const prices = result.map(p => p.discountPrice ?? p.price);
-  return prices.length ? Math.min(...prices) : 0;
-})
-
-const dynamicMaxPrice = computed(() => {
-  let result = categoryProducts.value.value;
-
-  if (filters.value.colors.length > 0) {
-    result = result.filter(p => filters.value.colors.includes(p.color));
+  const range = getPriceRange(result)
+  return {
+    min: range.min || 0,
+    max: range.max || categoryMaxPrice.value
   }
-
-  result = result.filter(p => p.rating >= (filters.value.minRating ?? 1));
-
-  const prices = result.map(p => p.discountPrice ?? p.price);
-  return prices.length ? Math.max(...prices) : categoryMaxPrice.value;
 })
 
+const dynamicMinPrice = computed(() => dynamicPriceRange.value.min)
+const dynamicMaxPrice = computed(() => dynamicPriceRange.value.max)
 
+// Filtered and sorted products
 const filteredProducts = computed(() => {
-  let result = categoryProducts.value.value;
+  let result = categoryProducts.value.value
 
-  if (filters.value.colors.length > 0) {
-    result = result.filter(p => filters.value.colors.includes(p.color));
-  }
-
-  result = result.filter(p => {
-    const price = p.discountPrice ?? p.price;
-    return price >= filters.value.priceMin && price <= filters.value.priceMax;
-  });
-
-  result = result.filter(p => p.rating >= (filters.value.minRating ?? 1))
+  result = applyColorFilter(result, filters.value.colors)
+  result = applyPriceFilter(result, filters.value.priceMin, filters.value.priceMax)
+  result = applyRatingFilter(result, filters.value.minRating ?? 1)
 
   return [...result].sort((a, b) => {
-    const pA = a.discountPrice ?? a.price;
-    const pB = b.discountPrice ?? b.price;
+    const pA = a.discountPrice ?? a.price
+    const pB = b.discountPrice ?? b.price
     switch (sortOption.value) {
       case 'name-asc': return a.name.localeCompare(b.name)
       case 'name-desc': return b.name.localeCompare(a.name)
@@ -90,7 +78,7 @@ const filteredProducts = computed(() => {
       case 'price-desc': return pB - pA
       default: return 0
     }
-  });
+  })
 });
 
 watch(categoryProducts, () => {
@@ -112,15 +100,16 @@ watch(
 const visibleProducts = computed(() =>
   filteredProducts.value.slice(0, currentPage.value * PAGE_SIZE)
 );
+
 const hasMore = computed(() =>
   visibleProducts.value.length < filteredProducts.value.length
 );
 
-function loadMore() { currentPage.value++ };
+function loadMore() { currentPage.value++ }
 
 function handleAddToCart(product: Product) {
-  cartStore.addItem(product);
-  toastStore.show(`"${product.name}" added to cart!`);
+  cartStore.addItem(product)
+  toastStore.show(`"${product.name}" added to cart!`)
 }
 </script>
 
@@ -170,7 +159,7 @@ function handleAddToCart(product: Product) {
             <ProductCard v-for="product in visibleProducts" :key="product.id" :product="product"
               @add-to-cart="handleAddToCart" />
           </div>
-          
+
           <div v-if="visibleProducts.length === 0" class="text-center py-20 text-gray-500">
             <p class="text-lg font-medium">No products found</p>
             <p class="text-sm mt-1">Try adjusting your filters.</p>

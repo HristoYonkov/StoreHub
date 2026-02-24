@@ -179,7 +179,7 @@ const resetFilters = () => {
                 class="w-full h-2 bg-transparent pointer-events-auto cursor-pointer" />
             </div>
             <p class="text-xs text-gray-500 mt-2 text-center">
-              {{ minRatingLocal }} To 5
+              {{ minRatingLocal == 5 ? '4.5 to 5.0' : minRatingLocal + ' Stars & Up' }}
             </p>
           </div>
         </div>
