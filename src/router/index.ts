@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import ProductListing from '@/views/ProductListing.vue'
 
-const CATEGORIES = ['bags', 'shoes', 'accessories', 'watches', 'jackets', 'hats']
+const CATEGORIES = ['bags', 'shoes', 'jackets', 'hats']
 
 const routes: RouteRecordRaw[] = [
   { path: '/', redirect: '/bags' },
