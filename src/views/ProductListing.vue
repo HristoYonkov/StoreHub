@@ -161,8 +161,8 @@ function handleAddToCart(product: Product) {
               Showing <strong>{{ visibleProducts.length }}</strong> of <strong>{{ filteredProducts.length }}</strong>
               product{{ filteredProducts.length !== 1 ? 's' : '' }}
             </p>
-            <div class="flex items-center gap-3">
-              <span class="text-gray-600 font-medium">Sort by:</span>
+            <div class="flex items-center gap-3 w-full justify-between sm:w-auto sm:justify-start">
+              <span class="text-gray-600 font-medium whitespace-nowrap">Sort by:</span>
               <SortDropdown v-model="sortOption" />
             </div>
           </div>
