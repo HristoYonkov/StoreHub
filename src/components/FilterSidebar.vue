@@ -4,9 +4,10 @@ import type { ProductFilters } from '@/types/product'
 import { panelStates } from '@/constants/styles'
 
 const props = defineProps<{
-  modelValue: ProductFilters
-  availableColors: string[]
-  maxPrice: number
+  modelValue: ProductFilters;
+  availableColors: string[];
+  minPrice: number;
+  maxPrice: number;
 }>()
 
 const emit = defineEmits<{
@@ -18,9 +19,7 @@ const filters = computed({
   set: (val) => emit('update:modelValue', val)
 })
 
-const minPrice = 0;
-
-const priceMinLocal = ref(props.modelValue.priceMin ?? minPrice);
+const priceMinLocal = ref(props.modelValue.priceMin ?? props.minPrice);
 const priceMaxLocal = ref(props.modelValue.priceMax ?? props.maxPrice);
 const minRatingLocal = ref(props.modelValue.minRating ?? 1);
 
@@ -49,27 +48,35 @@ watch(minRatingLocal, (val) => {
   filters.value = { ...filters.value, minRating: val }
 })
 
-// Auto-adjust priceMaxLocal when maxPrice increases
-watch(() => props.maxPrice, (newMax, oldMax) => {
-  if (newMax > oldMax) {
-    priceMaxLocal.value = newMax
+// Auto-adjust and clamp priceMinLocal when minPrice changes
+watch(() => props.minPrice, (newMin, oldMin) => {
+  if (oldMin === undefined || newMin < oldMin) {
+    priceMinLocal.value = newMin
     syncPrices()
   }
-})
+  else if (priceMinLocal.value < newMin) {
+    priceMinLocal.value = newMin
+    syncPrices()
+  }
+}, { immediate: true });
 
-// Clamp when maxPrice prop changes
-watch(() => props.maxPrice, (newMax) => {
-  if (priceMaxLocal.value > newMax) {
+// Auto-adjust priceMaxLocal when maxPrice changes
+watch(() => props.maxPrice, (newMax, oldMax) => {
+  if (oldMax === undefined || newMax > oldMax) {
     priceMaxLocal.value = newMax
     syncPrices()
   }
-})
+  else if (priceMaxLocal.value > newMax) {
+    priceMaxLocal.value = newMax
+    syncPrices()
+  }
+}, { immediate: true });
 
 // Sync from parent changes (reset, etc.)
 watch(
   () => props.modelValue,
   (newVal) => {
-    priceMinLocal.value = newVal.priceMin ?? minPrice;
+    priceMinLocal.value = newVal.priceMin ?? props.minPrice;
     priceMaxLocal.value = newVal.priceMax ?? props.maxPrice;
     minRatingLocal.value = newVal.minRating ?? 1;
   },
@@ -79,12 +86,12 @@ watch(
 const resetFilters = () => {
   filters.value = {
     colors: [],
-    priceMin: minPrice,
+    priceMin: props.minPrice,
     priceMax: props.maxPrice,
     minRating: 1
   }
   
-  priceMinLocal.value = minPrice;
+  priceMinLocal.value = props.minPrice;
   priceMaxLocal.value = props.maxPrice;
   minRatingLocal.value = 1;
   // panelOpen.value = false;
@@ -193,9 +200,9 @@ const resetFilters = () => {
 
           <div :class="['overflow-hidden transition-all duration-300', priceOpen ? 'max-h-40' : 'max-h-0 lg:max-h-40']">
             <div class="flex items-center gap-4 my-2">
-              <input v-model.number="priceMinLocal" type="range" :min="minPrice" :max="props.maxPrice" step="1"
+              <input v-model.number="priceMinLocal" type="range" :min="props.minPrice" :max="props.maxPrice" step="1"
                 class="w-full h-2 bg-transparent pointer-events-auto cursor-pointer" />
-              <input v-model.number="priceMaxLocal" type="range" :min="minPrice" :max="props.maxPrice" step="1"
+              <input v-model.number="priceMaxLocal" type="range" :min="props.minPrice" :max="props.maxPrice" step="1"
                 class="w-full h-2 bg-transparent pointer-events-auto cursor-pointer" />
             </div>
 

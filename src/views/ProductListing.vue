@@ -38,18 +38,33 @@ const filters = ref<ProductFilters>({
   minRating: 1
 });
 
-const dynamicMaxPrice = computed(() => {
-  let result = categoryProducts.value.value
+// Dynamic min and max price based on color and rating filters (before price filter)
+const dynamicMinPrice = computed(() => {
+  let result = categoryProducts.value.value;
 
   if (filters.value.colors.length > 0) {
     result = result.filter(p => filters.value.colors.includes(p.color))
+  };
+
+  result = result.filter(p => p.rating >= (filters.value.minRating ?? 1));
+
+  const prices = result.map(p => p.discountPrice ?? p.price);
+  return prices.length ? Math.min(...prices) : 0;
+})
+
+const dynamicMaxPrice = computed(() => {
+  let result = categoryProducts.value.value;
+
+  if (filters.value.colors.length > 0) {
+    result = result.filter(p => filters.value.colors.includes(p.color));
   }
 
-  result = result.filter(p => p.rating >= (filters.value.minRating ?? 1))
+  result = result.filter(p => p.rating >= (filters.value.minRating ?? 1));
 
-  const prices = result.map(p => p.discountPrice ?? p.price)
-  return prices.length ? Math.max(...prices) : categoryMaxPrice.value
+  const prices = result.map(p => p.discountPrice ?? p.price);
+  return prices.length ? Math.max(...prices) : categoryMaxPrice.value;
 })
+
 
 const filteredProducts = computed(() => {
   let result = categoryProducts.value.value;
@@ -135,7 +150,8 @@ function handleAddToCart(product: Product) {
       <!-- Content -->
       <div v-else class="flex flex-col lg:flex-row gap-8">
         <aside class="w-full lg:w-72 lg:shrink-0">
-          <FilterSidebar v-model="filters" :available-colors="availableColors" :max-price="dynamicMaxPrice" />
+          <FilterSidebar v-model="filters" :available-colors="availableColors" :min-price="dynamicMinPrice"
+            :max-price="dynamicMaxPrice" />
         </aside>
 
         <div class="flex-1 min-w-0">
@@ -151,11 +167,16 @@ function handleAddToCart(product: Product) {
           </div>
 
           <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
-            <ProductCard v-for="product in visibleProducts" :key="product.id" :product="product" @add-to-cart="handleAddToCart"/>
+            <ProductCard v-for="product in visibleProducts" :key="product.id" :product="product"
+              @add-to-cart="handleAddToCart" />
+          </div>
+          
+          <div v-if="visibleProducts.length === 0" class="text-center py-20 text-gray-500">
+            <p class="text-lg font-medium">No products found</p>
+            <p class="text-sm mt-1">Try adjusting your filters.</p>
           </div>
         </div>
       </div>
-
       <LoadMoreButton v-if="hasMore" :shown="visibleProducts.length" :total="filteredProducts.length"
         @load-more="loadMore" />
     </div>
