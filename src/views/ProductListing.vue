@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import FilterSidebar from '@/components/FilterSidebar.vue';
 import LoadMoreButton from '@/components/LoadMoreButton.vue';
 import ProductCard from '@/components/ProductCard.vue';
 import SortDropdown from '@/components/SortDropdown.vue';
 import { useProductsStore } from '@/stores/products';
-import { SortOption } from '@/types/product';
+import { ProductFilters, SortOption } from '@/types/product';
 import { computed, onMounted, ref, watch } from 'vue';
 
 const productsStore = useProductsStore();
@@ -16,14 +17,35 @@ onMounted(() => productsStore.load());
 
 const categoryProducts = computed(() => productsStore.byCategory(props.category));
 
-watch(categoryProducts, () => {
-  sortOption.value = 'name-asc';
-  currentPage.value = 1;
+const categoryMaxPrice = computed(() => {
+  const prices = categoryProducts.value.value.map(p => p.discountPrice ?? p.price)
+  return prices.length ? Math.max(...prices) : 500
 });
+
+const filters = ref<ProductFilters>({
+  colors: [],
+  priceMin: 0,
+  priceMax: categoryMaxPrice.value,
+  minRating: 1
+});
+
+const availableColors = computed(() =>
+  [...new Set(categoryProducts.value.value.map(p => p.color))].sort()
+)
 
 const filteredProducts = computed(() => {
   let result = categoryProducts.value.value;
 
+  if (filters.value.colors.length > 0) {
+    result = result.filter(p => filters.value.colors.includes(p.color));
+  }
+
+  result = result.filter(p => {
+    const price = p.discountPrice ?? p.price
+    return price >= filters.value.priceMin && price <= filters.value.priceMax
+  });
+
+  result = result.filter(p => p.rating >= (filters.value.minRating ?? 1))
   return [...result].sort((a, b) => {
     const pA = a.discountPrice ?? a.price
     const pB = b.discountPrice ?? b.price
@@ -36,6 +58,22 @@ const filteredProducts = computed(() => {
     }
   })
 });
+
+watch(categoryProducts, () => {
+  filters.value = { colors: [], priceMin: 0, priceMax: categoryMaxPrice.value, minRating: 1 }
+  sortOption.value = 'name-asc';
+  currentPage.value = 1;
+});
+
+watch(() => categoryProducts.value.value, () => {
+  filters.value.priceMax = categoryMaxPrice.value
+});
+
+watch(
+  () => ({ ...filters.value, sort: sortOption.value }),
+  () => { currentPage.value = 1 },
+  { deep: true }
+)
 
 const visibleProducts = computed(() =>
   filteredProducts.value.slice(0, currentPage.value * PAGE_SIZE)
@@ -72,10 +110,14 @@ function loadMore() { currentPage.value++ };
 
       <!-- Content -->
       <div v-else class="flex flex-col lg:flex-row gap-8">
+        <aside class="w-full lg:w-72 lg:shrink-0">
+          <FilterSidebar v-model="filters" :available-colors="availableColors" :max-price="categoryMaxPrice" />
+        </aside>
+
         <div class="flex-1 min-w-0">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <p class="text-gray-700">
-              Showing <strong>{{visibleProducts.length}}</strong> of <strong>{{ filteredProducts.length }}</strong>
+              Showing <strong>{{ visibleProducts.length }}</strong> of <strong>{{ filteredProducts.length }}</strong>
               product{{ filteredProducts.length !== 1 ? 's' : '' }}
             </p>
             <div class="flex items-center gap-3">
