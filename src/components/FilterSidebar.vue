@@ -49,6 +49,14 @@ watch(minRatingLocal, (val) => {
   filters.value = { ...filters.value, minRating: val }
 })
 
+// Auto-adjust priceMaxLocal when maxPrice increases
+watch(() => props.maxPrice, (newMax, oldMax) => {
+  if (newMax > oldMax) {
+    priceMaxLocal.value = newMax
+    syncPrices()
+  }
+})
+
 // Clamp when maxPrice prop changes
 watch(() => props.maxPrice, (newMax) => {
   if (priceMaxLocal.value > newMax) {
@@ -61,9 +69,9 @@ watch(() => props.maxPrice, (newMax) => {
 watch(
   () => props.modelValue,
   (newVal) => {
-    priceMinLocal.value = newVal.priceMin ?? minPrice
-    priceMaxLocal.value = newVal.priceMax ?? props.maxPrice
-    minRatingLocal.value = newVal.minRating ?? 1
+    priceMinLocal.value = newVal.priceMin ?? minPrice;
+    priceMaxLocal.value = newVal.priceMax ?? props.maxPrice;
+    minRatingLocal.value = newVal.minRating ?? 1;
   },
   { deep: true }
 )

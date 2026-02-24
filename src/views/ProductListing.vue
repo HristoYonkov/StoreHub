@@ -19,11 +19,11 @@ const categoryProducts = computed(() => productsStore.byCategory(props.category)
 
 const categoryMaxPrice = computed(() => {
   const prices = categoryProducts.value.value.map(p => p.discountPrice ?? p.price)
-  return prices.length ? Math.max(...prices) : 500
+  return prices.length ? Math.max(...prices) : 0
 });
 
 const availableColors = computed(() =>
-[...new Set(categoryProducts.value.value.map(p => p.color))].sort()
+  [...new Set(categoryProducts.value.value.map(p => p.color))].sort()
 );
 
 const filters = ref<ProductFilters>({
@@ -32,6 +32,19 @@ const filters = ref<ProductFilters>({
   priceMax: categoryMaxPrice.value,
   minRating: 1
 });
+
+const dynamicMaxPrice = computed(() => {
+  let result = categoryProducts.value.value
+
+  if (filters.value.colors.length > 0) {
+    result = result.filter(p => filters.value.colors.includes(p.color))
+  }
+
+  result = result.filter(p => p.rating >= (filters.value.minRating ?? 1))
+
+  const prices = result.map(p => p.discountPrice ?? p.price)
+  return prices.length ? Math.max(...prices) : categoryMaxPrice.value
+})
 
 const filteredProducts = computed(() => {
   let result = categoryProducts.value.value;
@@ -46,6 +59,7 @@ const filteredProducts = computed(() => {
   });
 
   result = result.filter(p => p.rating >= (filters.value.minRating ?? 1))
+
   return [...result].sort((a, b) => {
     const pA = a.discountPrice ?? a.price;
     const pB = b.discountPrice ?? b.price;
@@ -111,7 +125,7 @@ function loadMore() { currentPage.value++ };
       <!-- Content -->
       <div v-else class="flex flex-col lg:flex-row gap-8">
         <aside class="w-full lg:w-72 lg:shrink-0">
-          <FilterSidebar v-model="filters" :available-colors="availableColors" :max-price="categoryMaxPrice" />
+          <FilterSidebar v-model="filters" :available-colors="availableColors" :max-price="dynamicMaxPrice" />
         </aside>
 
         <div class="flex-1 min-w-0">
