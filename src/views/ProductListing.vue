@@ -7,7 +7,7 @@ import { useCartStore } from '@/stores/cart';
 import { useProductsStore } from '@/stores/products';
 import { useToastStore } from '@/stores/toast';
 import { Product, ProductFilters, SortOption } from '@/types/product';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, TransitionGroup, watch } from 'vue';
 import {
   applyColorFilter,
   applyRatingFilter,
@@ -167,10 +167,12 @@ function handleAddToCart(product: Product) {
             </div>
           </div>
 
-          <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+          <TransitionGroup tag="div" class="grid grid-cols-2 lg:grid-cols-3 gap-6"
+            enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 translate-y-4"
+            enter-to-class="opacity-100 translate-y-0" move-class="transition-all duration-300">
             <ProductCard v-for="product in visibleProducts" :key="product.id" :product="product"
               @add-to-cart="handleAddToCart" />
-          </div>
+          </TransitionGroup>
 
           <div v-if="visibleProducts.length === 0" class="text-center py-20 text-gray-500">
             <p class="text-lg font-medium">No products found</p>

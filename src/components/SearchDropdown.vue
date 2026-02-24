@@ -57,7 +57,7 @@ function goToProduct(id: number) {
     >
       <div
         v-if="isOpen"
-        class="absolute right-0 top-12 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden"
+        class="fixed left-2 right-2 top-16 sm:absolute sm:top-12 sm:left-auto sm:right-0 sm:w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden"
       >
         <!-- Input -->
         <div class="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
