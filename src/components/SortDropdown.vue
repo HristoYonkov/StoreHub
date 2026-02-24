@@ -1,22 +1,28 @@
 <script setup lang="ts">
 import type { SortOption } from '@/types/product'
+import { computed, ref } from 'vue';
 
+const props = defineProps<{ modelValue: SortOption }>();
+const emit = defineEmits<{ (e: 'update:modelValue', value: SortOption): void }>();
 
 const sortOptions: { value: SortOption; label: string }[] = [
   { value: 'name-asc', label: 'Name (A–Z)' },
   { value: 'name-desc', label: 'Name (Z–A)' },
   { value: 'price-asc', label: 'Price: Low to High' },
   { value: 'price-desc', label: 'Price: High to Low' },
-]
+];
 
-
-
+const selected = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value)
+});
+const isOpen = ref(false);
 </script>
 
 <template>
   <div class="relative inline-block w-full sm:w-48">
-    <select class="
-    block w-full px-4 py-2 pr-8 text-gray-700 bg-white border border-gray-300
+    <select v-model="selected" @click="isOpen = !isOpen" @change="isOpen = false" @blur="isOpen = false"
+    class="block w-full px-4 py-2 pr-8 text-gray-700 bg-white border border-gray-300
     rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500
     focus:border-indigo-500 appearance-none cursor-pointer
   ">

@@ -1,20 +1,49 @@
 <script setup lang="ts">
+import LoadMoreButton from '@/components/LoadMoreButton.vue';
 import ProductCard from '@/components/ProductCard.vue';
 import SortDropdown from '@/components/SortDropdown.vue';
 import { useProductsStore } from '@/stores/products';
 import { SortOption } from '@/types/product';
-import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue';
 
-const route = useRoute();
 const productsStore = useProductsStore();
-const category = computed(() => (route.params.category as string) || 'bags');
+const props = defineProps<{ category: string }>();
 const sortOption = ref<SortOption>('name-asc');
+const PAGE_SIZE = 5;
+const currentPage = ref(1);
 
 onMounted(() => productsStore.load());
 
-const categoryProducts = computed(() => productsStore.byCategory(category.value));
+const categoryProducts = computed(() => productsStore.byCategory(props.category));
 
+watch(categoryProducts, () => {
+  sortOption.value = 'name-asc';
+  currentPage.value = 1;
+});
+
+const filteredProducts = computed(() => {
+  let result = categoryProducts.value.value;
+
+  return [...result].sort((a, b) => {
+    const pA = a.discountPrice ?? a.price
+    const pB = b.discountPrice ?? b.price
+    switch (sortOption.value) {
+      case 'name-asc': return a.name.localeCompare(b.name)
+      case 'name-desc': return b.name.localeCompare(a.name)
+      case 'price-asc': return pA - pB
+      case 'price-desc': return pB - pA
+      default: return 0
+    }
+  })
+});
+
+const visibleProducts = computed(() =>
+  filteredProducts.value.slice(0, currentPage.value * PAGE_SIZE)
+);
+const hasMore = computed(() =>
+  visibleProducts.value.length < filteredProducts.value.length
+);
+function loadMore() { currentPage.value++ };
 
 </script>
 
@@ -46,8 +75,8 @@ const categoryProducts = computed(() => productsStore.byCategory(category.value)
         <div class="flex-1 min-w-0">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <p class="text-gray-700">
-              Showing <strong>5</strong> of <strong>20</strong>
-              products
+              Showing <strong>{{visibleProducts.length}}</strong> of <strong>{{ filteredProducts.length }}</strong>
+              product{{ filteredProducts.length !== 1 ? 's' : '' }}
             </p>
             <div class="flex items-center gap-3">
               <span class="text-gray-600 font-medium">Sort by:</span>
@@ -56,11 +85,13 @@ const categoryProducts = computed(() => productsStore.byCategory(category.value)
           </div>
 
           <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
-            <ProductCard v-for="product in categoryProducts.value" :key="product.id" :product="product" />
+            <ProductCard v-for="product in visibleProducts" :key="product.id" :product="product" />
           </div>
         </div>
       </div>
 
+      <LoadMoreButton v-if="hasMore" :shown="visibleProducts.length" :total="filteredProducts.length"
+        @load-more="loadMore" />
     </div>
   </main>
 </template>
