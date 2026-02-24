@@ -1,6 +1,5 @@
 <script setup lang="ts">
-
-const categories = ['Bags', 'Shoes', 'Jackets', 'Hats']
+import { categories } from '@/constants/categories';
 const currentYear = new Date().getFullYear()
 </script>
 

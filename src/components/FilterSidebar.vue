@@ -145,7 +145,7 @@ const resetFilters = () => {
           <div :class="['overflow-hidden transition-all duration-300', colorOpen ? 'max-h-72' : 'max-h-0 lg:max-h-72']">
             <div class="space-y-2 max-h-60 overflow-y-auto pr-2">
               <label v-for="color in availableColors" :key="color" class="flex items-center cursor-pointer group">
-                <input type="checkbox" :value="color" v-model="filters.colors"
+                <input type="checkbox" :id="`color-${color}`" :value="color" v-model="filters.colors"
                   class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
                 <span class="ml-2 text-sm text-gray-700 group-hover:text-indigo-700 transition-colors">
                   {{ color }}

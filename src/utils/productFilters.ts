@@ -1,8 +1,4 @@
-import type { Product } from '@/types/product'
-
-export function getRatingThreshold(minRating: number): number {
-  return minRating === 5 ? 4.5 : minRating
-}
+import type { Product } from '@/types/product';
 
 export function applyColorFilter(products: Product[], colors: string[]): Product[] {
   if (colors.length === 0) return products

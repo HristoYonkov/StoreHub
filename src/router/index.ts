@@ -1,12 +1,11 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import ProductListing from '@/views/ProductListing.vue'
-
-const CATEGORIES = ['bags', 'shoes', 'jackets', 'hats']
+import { CATEGORY_SLUGS } from '@/constants/categories';
 
 const routes: RouteRecordRaw[] = [
   { path: '/', redirect: '/bags' },
   {
-    path: `/:category(${CATEGORIES.join('|')})`,
+    path: `/:category(${CATEGORY_SLUGS.join('|')})`,
     name: 'products',
     component: ProductListing,
     props: (route) => ({ category: route.params.category as string }),

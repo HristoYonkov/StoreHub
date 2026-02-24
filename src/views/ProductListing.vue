@@ -28,33 +28,38 @@ onMounted(() => productsStore.load());
 const categoryProducts = computed(() => productsStore.byCategory(props.category));
 
 const categoryMaxPrice = computed(() => {
-  const prices = categoryProducts.value.value.map(p => p.discountPrice ?? p.price)
+  const prices = categoryProducts.value.map(p => p.discountPrice ?? p.price)
   return prices.length ? Math.max(...prices) : 0
+});
+
+const categoryMinPrice = computed(() => {
+  const prices = categoryProducts.value.map(p => p.discountPrice ?? p.price)
+  return prices.length ? Math.min(...prices) : 0
 });
 
 const filters = ref<ProductFilters>({
   colors: [],
-  priceMin: 0,
+  priceMin: categoryMinPrice.value,
   priceMax: categoryMaxPrice.value,
   minRating: 1
 });
 
-// Available colors based on rating filter
+// Available colors based on category
 const availableColors = computed(() =>
-  [...new Set(categoryProducts.value.value.map(p => p.color))].sort()
+  [...new Set(categoryProducts.value.map(p => p.color))].sort()
 );
 
-// Dynamic price range based on color and rating filters
+// Dynamic price range зависи САМО от цветовете и рейтинга — не пише в filters
 const dynamicPriceRange = computed(() => {
-  let result = categoryProducts.value.value
+  let result = categoryProducts.value
   result = applyColorFilter(result, filters.value.colors)
   result = applyRatingFilter(result, filters.value.minRating ?? 1)
 
-  const range = getPriceRange(result)
-  return {
-    min: range.min || 0,
-    max: range.max || categoryMaxPrice.value
+  if (result.length === 0) {
+    return { min: categoryMinPrice.value, max: categoryMaxPrice.value }
   }
+
+  return getPriceRange(result)
 })
 
 const dynamicMinPrice = computed(() => dynamicPriceRange.value.min)
@@ -62,7 +67,7 @@ const dynamicMaxPrice = computed(() => dynamicPriceRange.value.max)
 
 // Filtered and sorted products
 const filteredProducts = computed(() => {
-  let result = categoryProducts.value.value
+  let result = categoryProducts.value
 
   result = applyColorFilter(result, filters.value.colors)
   result = applyPriceFilter(result, filters.value.priceMin, filters.value.priceMax)
@@ -81,14 +86,21 @@ const filteredProducts = computed(() => {
   })
 });
 
-watch(categoryProducts, () => {
-  filters.value = { colors: [], priceMin: 0, priceMax: categoryMaxPrice.value, minRating: 1 }
-  sortOption.value = 'name-asc';
-  currentPage.value = 1;
-});
+// Когато dynamic range се стесни (смяна на цвят/рейтинг) — clamp цените без да пишем цветовете/рейтинга
+watch(dynamicPriceRange, ({ min, max }) => {
+  const newMin = Math.min(Math.max(filters.value.priceMin, min), max)
+  const newMax = Math.max(Math.min(filters.value.priceMax, max), min)
+  if (newMin !== filters.value.priceMin || newMax !== filters.value.priceMax) {
+    filters.value = { ...filters.value, priceMin: newMin, priceMax: newMax }
+  }
+})
 
-watch(() => categoryProducts.value.value, () => {
-  filters.value.priceMax = categoryMaxPrice.value
+watch(categoryMaxPrice, (newMax, oldMax) => {
+  if (oldMax === 0 || newMax !== oldMax) {
+    filters.value = { colors: [], priceMin: categoryMinPrice.value, priceMax: newMax, minRating: 1 }
+    sortOption.value = 'name-asc'
+    currentPage.value = 1
+  }
 });
 
 watch(

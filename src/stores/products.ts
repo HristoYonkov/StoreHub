@@ -22,11 +22,13 @@ export const useProductsStore = defineStore('products', () => {
     }
   }
 
-  const byCategory = (category: string) =>
-    computed(() => all.value.filter(p => p.category.toLowerCase() === category.toLowerCase()))
+  function byCategory(category: string): Product[] {
+    return all.value.filter(p => p.category.toLowerCase() === category.toLowerCase())
+  }
 
-  const byId = (id: number) =>
-    computed(() => all.value.find(p => p.id === id))
+  function byId(id: number): Product | undefined {
+    return all.value.find(p => p.id === id)
+  }
 
   return { all, loading, error, load, byCategory, byId }
 })
