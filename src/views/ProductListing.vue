@@ -3,8 +3,10 @@ import FilterSidebar from '@/components/FilterSidebar.vue';
 import LoadMoreButton from '@/components/LoadMoreButton.vue';
 import ProductCard from '@/components/ProductCard.vue';
 import SortDropdown from '@/components/SortDropdown.vue';
+import { useCartStore } from '@/stores/cart';
 import { useProductsStore } from '@/stores/products';
-import { ProductFilters, SortOption } from '@/types/product';
+import { useToastStore } from '@/stores/toast';
+import { Product, ProductFilters, SortOption } from '@/types/product';
 import { computed, onMounted, ref, watch } from 'vue';
 
 const productsStore = useProductsStore();
@@ -12,6 +14,9 @@ const props = defineProps<{ category: string }>();
 const sortOption = ref<SortOption>('name-asc');
 const PAGE_SIZE = 5;
 const currentPage = ref(1);
+const cartStore = useCartStore();
+const toastStore = useToastStore();
+
 
 onMounted(() => productsStore.load());
 
@@ -97,6 +102,11 @@ const hasMore = computed(() =>
 );
 
 function loadMore() { currentPage.value++ };
+
+function handleAddToCart(product: Product) {
+  cartStore.addItem(product);
+  toastStore.show(`"${product.name}" added to cart!`);
+}
 </script>
 
 <template>
@@ -141,7 +151,7 @@ function loadMore() { currentPage.value++ };
           </div>
 
           <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
-            <ProductCard v-for="product in visibleProducts" :key="product.id" :product="product" />
+            <ProductCard v-for="product in visibleProducts" :key="product.id" :product="product" @add-to-cart="handleAddToCart"/>
           </div>
         </div>
       </div>

@@ -12,6 +12,11 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({ category: route.params.category as string }),
   },
   {
+    path: '/cart',
+    name: 'cart',
+    component: () => import('@/views/Cart.vue'),
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/views/NotFound.vue'),
