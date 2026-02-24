@@ -10,13 +10,13 @@ const productsStore = useProductsStore();
 
 const liveStock = computed(() =>
   productsStore.all.find(p => p.id === props.product.id)?.stock ?? props.product.stock ?? 0
-)
+);
 
 const displayPrice = computed(() => props.product.discountPrice ?? props.product.price)
 const discountPercent = computed(() => {
   if (!props.product.discountPrice) return 0
   return Math.round((1 - props.product.discountPrice / props.product.price) * 100)
-})
+});
 </script>
 
 <template>
@@ -31,7 +31,10 @@ const discountPercent = computed(() => {
         class="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
         -{{ discountPercent }}%
       </span>
-      
+      <span
+        class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-800 text-[10px] uppercase font-bold px-2 py-1 rounded shadow-sm border border-gray-100">
+        {{ product.color }}
+      </span>
     </div>
 
     <!-- Content -->
@@ -59,11 +62,8 @@ const discountPercent = computed(() => {
       </p>
 
       <!-- Add to cart button -->
-      <button
-        @click.prevent="emit('add-to-cart', product)"
-        :disabled="liveStock === 0"
-        class="mt-auto w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-3 text-sm sm:py-3 sm:px-4 sm:text-base rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer"
-      >
+      <button @click.prevent="emit('add-to-cart', product)" :disabled="liveStock === 0"
+        class="mt-auto w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-3 text-sm sm:py-3 sm:px-4 sm:text-base rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer">
         {{ liveStock === 0 ? 'Out of Stock' : 'Add to Cart' }}
       </button>
     </div>
