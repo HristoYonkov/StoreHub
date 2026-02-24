@@ -22,16 +22,16 @@ const categoryMaxPrice = computed(() => {
   return prices.length ? Math.max(...prices) : 500
 });
 
+const availableColors = computed(() =>
+[...new Set(categoryProducts.value.value.map(p => p.color))].sort()
+);
+
 const filters = ref<ProductFilters>({
   colors: [],
   priceMin: 0,
   priceMax: categoryMaxPrice.value,
   minRating: 1
 });
-
-const availableColors = computed(() =>
-  [...new Set(categoryProducts.value.value.map(p => p.color))].sort()
-)
 
 const filteredProducts = computed(() => {
   let result = categoryProducts.value.value;
@@ -41,14 +41,14 @@ const filteredProducts = computed(() => {
   }
 
   result = result.filter(p => {
-    const price = p.discountPrice ?? p.price
-    return price >= filters.value.priceMin && price <= filters.value.priceMax
+    const price = p.discountPrice ?? p.price;
+    return price >= filters.value.priceMin && price <= filters.value.priceMax;
   });
 
   result = result.filter(p => p.rating >= (filters.value.minRating ?? 1))
   return [...result].sort((a, b) => {
-    const pA = a.discountPrice ?? a.price
-    const pB = b.discountPrice ?? b.price
+    const pA = a.discountPrice ?? a.price;
+    const pB = b.discountPrice ?? b.price;
     switch (sortOption.value) {
       case 'name-asc': return a.name.localeCompare(b.name)
       case 'name-desc': return b.name.localeCompare(a.name)
@@ -56,7 +56,7 @@ const filteredProducts = computed(() => {
       case 'price-desc': return pB - pA
       default: return 0
     }
-  })
+  });
 });
 
 watch(categoryProducts, () => {
@@ -73,7 +73,7 @@ watch(
   () => ({ ...filters.value, sort: sortOption.value }),
   () => { currentPage.value = 1 },
   { deep: true }
-)
+);
 
 const visibleProducts = computed(() =>
   filteredProducts.value.slice(0, currentPage.value * PAGE_SIZE)
@@ -81,8 +81,8 @@ const visibleProducts = computed(() =>
 const hasMore = computed(() =>
   visibleProducts.value.length < filteredProducts.value.length
 );
-function loadMore() { currentPage.value++ };
 
+function loadMore() { currentPage.value++ };
 </script>
 
 <template>

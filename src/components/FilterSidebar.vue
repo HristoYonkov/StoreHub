@@ -18,12 +18,11 @@ const filters = computed({
   set: (val) => emit('update:modelValue', val)
 })
 
-const minPrice = 0
-const maxPrice = props.maxPrice
+const minPrice = 0;
 
-const priceMinLocal = ref(props.modelValue.priceMin ?? minPrice)
-const priceMaxLocal = ref(props.modelValue.priceMax ?? maxPrice)
-const minRatingLocal = ref(props.modelValue.minRating ?? 1)
+const priceMinLocal = ref(props.modelValue.priceMin ?? minPrice);
+const priceMaxLocal = ref(props.modelValue.priceMax ?? props.maxPrice);
+const minRatingLocal = ref(props.modelValue.minRating ?? 1);
 
 // Panel + accordion state — all closed by default on mobile
 const panelOpen = ref(false)
@@ -63,7 +62,7 @@ watch(
   () => props.modelValue,
   (newVal) => {
     priceMinLocal.value = newVal.priceMin ?? minPrice
-    priceMaxLocal.value = newVal.priceMax ?? maxPrice
+    priceMaxLocal.value = newVal.priceMax ?? props.maxPrice
     minRatingLocal.value = newVal.minRating ?? 1
   },
   { deep: true }
@@ -73,12 +72,12 @@ const resetFilters = () => {
   filters.value = {
     colors: [],
     priceMin: minPrice,
-    priceMax: maxPrice,
+    priceMax: props.maxPrice,
     minRating: 1
   }
   
   priceMinLocal.value = minPrice;
-  priceMaxLocal.value = maxPrice;
+  priceMaxLocal.value = props.maxPrice;
   minRatingLocal.value = 1;
   // panelOpen.value = false;
   // colorOpen.value = false;
@@ -186,9 +185,9 @@ const resetFilters = () => {
 
           <div :class="['overflow-hidden transition-all duration-300', priceOpen ? 'max-h-40' : 'max-h-0 lg:max-h-40']">
             <div class="flex items-center gap-4 my-2">
-              <input v-model.number="priceMinLocal" type="range" :min="minPrice" :max="maxPrice" step="1"
+              <input v-model.number="priceMinLocal" type="range" :min="minPrice" :max="props.maxPrice" step="1"
                 class="w-full h-2 bg-transparent pointer-events-auto cursor-pointer" />
-              <input v-model.number="priceMaxLocal" type="range" :min="minPrice" :max="maxPrice" step="1"
+              <input v-model.number="priceMaxLocal" type="range" :min="minPrice" :max="props.maxPrice" step="1"
                 class="w-full h-2 bg-transparent pointer-events-auto cursor-pointer" />
             </div>
 
