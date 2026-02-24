@@ -22,6 +22,7 @@ const discountPercent = computed(() => {
         class="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
         -{{ discountPercent }}%
       </span>
+      
     </div>
 
     <!-- Content -->
