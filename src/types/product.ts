@@ -12,3 +12,15 @@ export interface Product {
 }
 
 export type SortOption = 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc';
+
+export interface PriceRange {
+  min: number;
+  max: number;
+}
+
+export interface ProductFilters {
+  colors: string[];
+  priceMin: number;
+  priceMax: number;
+  minRating?: number
+}
