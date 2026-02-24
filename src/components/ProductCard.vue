@@ -53,6 +53,11 @@ const discountPercent = computed(() => {
         <span class="ml-2 text-sm text-gray-500">({{ product.rating.toFixed(1) }})</span>
       </div>
 
+      <!-- Stock indicator -->
+      <p v-if="liveStock > 0 && liveStock <= 5" class="text-xs text-orange-500 font-medium mb-2">
+        Only {{ liveStock }} left!
+      </p>
+
       <!-- Add to cart button -->
       <button
         @click.prevent="emit('add-to-cart', product)"
