@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import type { Product } from '@/types/product'
 import { fetchProducts } from '@/services/api'
+// import db from '../../db.json'
 
 export const useProductsStore = defineStore('products', () => {
   const all = ref<Product[]>([])
@@ -15,6 +16,19 @@ export const useProductsStore = defineStore('products', () => {
     error.value = null
     try {
       all.value = await fetchProducts()
+      // all.value = db.products as Product[]
+
+      // Synchronize stock with cart
+      const saved = localStorage.getItem('storehub_cart')
+      if (saved) {
+        const cartItems = JSON.parse(saved)
+        cartItems.forEach((cartItem: { id: number, qty: number }) => {
+          const product = all.value.find(p => p.id === cartItem.id)
+          if (product && product.stock !== undefined) {
+            product.stock = Math.max(0, product.stock - cartItem.qty)
+          }
+        })
+      }
     } catch (e) {
       error.value = 'Could not load products. Is the API server running?'
     } finally {

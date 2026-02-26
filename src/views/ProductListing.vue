@@ -49,14 +49,14 @@ const availableColors = computed(() =>
   [...new Set(categoryProducts.value.map(p => p.color))].sort()
 );
 
-// Dynamic price range зависи САМО от цветовете и рейтинга — не пише в filters
+// Dynamic price range and it dephends on filters also
 const dynamicPriceRange = computed(() => {
   let result = categoryProducts.value
   result = applyColorFilter(result, filters.value.colors)
   result = applyRatingFilter(result, filters.value.minRating ?? 1)
 
   if (result.length === 0) {
-    return { min: categoryMinPrice.value, max: categoryMaxPrice.value }
+    return { min: 0, max: 0 }
   }
 
   return getPriceRange(result)
@@ -86,7 +86,7 @@ const filteredProducts = computed(() => {
   })
 });
 
-// Когато dynamic range се стесни (смяна на цвят/рейтинг) — clamp цените без да пишем цветовете/рейтинга
+// When dynamic range changes (based on color rating) add new prices based on filters
 watch(dynamicPriceRange, ({ min, max }) => {
   const newMin = Math.min(Math.max(filters.value.priceMin, min), max)
   const newMax = Math.max(Math.min(filters.value.priceMax, max), min)
@@ -95,6 +95,7 @@ watch(dynamicPriceRange, ({ min, max }) => {
   }
 })
 
+// When categories change the new max and min prices are added
 watch(categoryMaxPrice, (newMax, oldMax) => {
   if (oldMax === 0 || newMax !== oldMax) {
     filters.value = { colors: [], priceMin: categoryMinPrice.value, priceMax: newMax, minRating: 1 }
@@ -103,6 +104,7 @@ watch(categoryMaxPrice, (newMax, oldMax) => {
   }
 });
 
+// When filters are updated, we want to reset the page size
 watch(
   () => ({ ...filters.value, sort: sortOption.value }),
   () => { currentPage.value = 1 },
@@ -150,11 +152,14 @@ function handleAddToCart(product: Product) {
 
       <!-- Content -->
       <div v-else class="flex flex-col lg:flex-row gap-8">
+
+      <!-- Filters -->
         <aside class="w-full lg:w-72 lg:shrink-0">
           <FilterSidebar v-model="filters" :available-colors="availableColors" :min-price="dynamicMinPrice"
             :max-price="dynamicMaxPrice" />
         </aside>
 
+        <!-- Sort Dropdown -->
         <div class="flex-1 min-w-0">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <p class="text-gray-700">
@@ -167,6 +172,7 @@ function handleAddToCart(product: Product) {
             </div>
           </div>
 
+          <!-- Product Cards -->
           <TransitionGroup tag="div" class="grid grid-cols-2 lg:grid-cols-3 gap-6"
             enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 translate-y-4"
             enter-to-class="opacity-100 translate-y-0" move-class="transition-all duration-300">
@@ -180,6 +186,7 @@ function handleAddToCart(product: Product) {
           </div>
         </div>
       </div>
+
       <LoadMoreButton v-if="hasMore" :shown="visibleProducts.length" :total="filteredProducts.length"
         @load-more="loadMore" />
     </div>

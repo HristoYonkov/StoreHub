@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import AppToast from './components/AppToast.vue'
 import { categories } from '@/constants/categories';
 
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
 
 const activeCategory = computed(() => {
   const cat = route.params.category as string
@@ -19,7 +18,6 @@ const activeCategory = computed(() => {
   <Header
   :categories="[...categories]"
   :model-value="activeCategory"
-  @update:model-value="cat => router.push(`/${cat.toLowerCase()}`)"
   />
   <router-view />
   <AppToast />

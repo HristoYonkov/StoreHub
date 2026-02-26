@@ -1,3 +1,4 @@
+// following code is essential for router to create web history
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {

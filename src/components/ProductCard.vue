@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import type { Product } from '@/types/product'
 import { useProductsStore } from '@/stores/products';
+import { RouterLink } from 'vue-router';
 
 const props = defineProps<{ product: Product }>();
 const emit = defineEmits<{ (e: 'add-to-cart', product: Product): void }>();

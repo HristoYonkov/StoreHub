@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import ProductListing from '@/views/ProductListing.vue'
 import { CATEGORY_SLUGS } from '@/constants/categories';
 
 const routes: RouteRecordRaw[] = [
@@ -7,7 +6,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: `/:category(${CATEGORY_SLUGS.join('|')})`,
     name: 'products',
-    component: ProductListing,
+    component: () => import('@/views/ProductListing.vue'),
     props: (route) => ({ category: route.params.category as string }),
   },
   {

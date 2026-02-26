@@ -20,8 +20,7 @@ const selected = computed({
 
 <template>
   <div class="relative inline-block sm:w-48">
-    <select v-model="selected"
-    class="block w-full px-4 py-2 pr-8 text-gray-700 bg-white border border-gray-300
+    <select v-model="selected" class="block w-full px-4 py-2 pr-8 text-gray-700 bg-white border border-gray-300
     rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500
     focus:border-indigo-500 appearance-none cursor-pointer
   ">
