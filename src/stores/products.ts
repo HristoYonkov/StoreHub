@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Product } from '@/types/product'
 import { fetchProducts } from '@/services/api'
-// import db from '../../db.json'
 
 export const useProductsStore = defineStore('products', () => {
   const all = ref<Product[]>([])
@@ -14,9 +13,9 @@ export const useProductsStore = defineStore('products', () => {
     if (all.value.length > 0) return
     loading.value = true
     error.value = null
+    
     try {
       all.value = await fetchProducts()
-      // all.value = db.products as Product[]
 
       // Synchronize stock with cart
       const saved = localStorage.getItem('storehub_cart')
