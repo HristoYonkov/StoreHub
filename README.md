@@ -1,6 +1,7 @@
 # StoreHub
 
 ## 1. How to Run the Application
+### Live Version at: https://hristo-store-hub.netlify.app/
 ### Installation
 ```bash
 # Install dependencies, open the project folder and run:
