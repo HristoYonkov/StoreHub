@@ -20,11 +20,13 @@ function handleRemove(id: number, name: string) {
       <!-- Empty -->
       <div v-if="cartStore.items.length === 0" class="text-center py-24">
         <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
         <p class="text-xl font-medium text-gray-500 mb-2">Your cart is empty</p>
         <p class="text-gray-400 mb-8">Add some products to get started.</p>
-        <RouterLink to="/" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">
+        <RouterLink to="/"
+          class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">
           Continue Shopping
         </RouterLink>
       </div>
@@ -34,16 +36,9 @@ function handleRemove(id: number, name: string) {
 
         <!-- List -->
         <div class="flex-1 space-y-4">
-          <div
-            v-for="item in cartStore.items"
-            :key="item.id"
-            class="flex gap-4 bg-white border border-gray-200 rounded-xl p-4"
-          >
-            <img
-              :src="item.image"
-              :alt="item.name"
-              class="w-24 h-24 object-cover rounded-lg bg-gray-50 shrink-0"
-            />
+          <div v-for="item in cartStore.items" :key="item.id"
+            class="flex gap-4 bg-white border border-gray-200 rounded-xl p-4">
+            <img :src="item.image" :alt="item.name" class="w-24 h-24 object-cover rounded-lg bg-gray-50 shrink-0" />
             <div class="flex-1 min-w-0">
               <h3 class="font-semibold text-gray-900 truncate">{{ item.name }}</h3>
               <p class="text-sm text-gray-500 mt-0.5">{{ item.color }}</p>
@@ -51,37 +46,29 @@ function handleRemove(id: number, name: string) {
 
               <!-- Qty controls -->
               <div class="flex items-center gap-2 mt-3">
-                <button
-                  @click="cartStore.decreaseQty(item.id)"
-                  class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer text-lg leading-none"
-                >−</button>
+                <button @click="cartStore.decreaseQty(item.id)"
+                  class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer text-lg leading-none">−</button>
                 <span class="w-6 text-center font-medium text-gray-900">{{ item.qty }}</span>
-                <button
-                  @click="cartStore.increaseQty(item.id)"
-                  class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer text-lg leading-none"
-                >+</button>
+                <button @click="cartStore.increaseQty(item.id)"
+                  class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer text-lg leading-none">+</button>
               </div>
             </div>
 
             <div class="flex flex-col items-end justify-between">
-              <button
-                @click="handleRemove(item.id, item.name)"
-                class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
-                aria-label="Remove"
-              >
+              <button @click="handleRemove(item.id, item.name)"
+                class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer" aria-label="Remove">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <p class="font-semibold text-gray-900">${{ ((item.discountPrice ?? item.price) * item.qty).toFixed(2) }}</p>
+              <p class="font-semibold text-gray-900">${{ ((item.discountPrice ?? item.price) * item.qty).toFixed(2) }}
+              </p>
             </div>
           </div>
 
           <!-- Clear cart -->
-          <button
-            @click="cartStore.clearCart()"
-            class="text-sm text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
-          >
+          <button @click="cartStore.clearCart()"
+            class="text-sm text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
             Clear cart
           </button>
         </div>
@@ -94,7 +81,11 @@ function handleRemove(id: number, name: string) {
             <div class="space-y-2 mb-4">
               <div class="flex justify-between text-sm text-gray-600">
                 <span>Items ({{ cartStore.totalItems }})</span>
-                <span>${{ cartStore.totalPrice.toFixed(2) }}</span>
+                <span>${{ cartStore.totalOriginalPrice.toFixed(2) }}</span>
+              </div>
+              <div v-if="cartStore.savings > 0" class="flex justify-between text-sm text-green-600">
+                <span>Discount savings</span>
+                <span>−${{ cartStore.savings.toFixed(2) }}</span>
               </div>
               <div class="flex justify-between text-sm text-gray-600">
                 <span>Shipping</span>
@@ -109,7 +100,8 @@ function handleRemove(id: number, name: string) {
               </div>
             </div>
 
-            <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors cursor-pointer">
+            <button
+              class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors cursor-pointer">
               Checkout
             </button>
 
