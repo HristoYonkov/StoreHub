@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import type { ProductFilters } from '@/types/product'
 import { panelStates } from '@/constants/styles'
+import { getColor } from '@/utils/colors'
 
 const props = defineProps<{
   modelValue: ProductFilters;
@@ -23,13 +24,13 @@ const priceMinLocal = ref(props.modelValue.priceMin ?? props.minPrice);
 const priceMaxLocal = ref(props.modelValue.priceMax ?? props.maxPrice);
 const minRatingLocal = ref(props.modelValue.minRating ?? 1);
 
-// Panel + accordion state — all closed by default on mobile
+// Panel and accordion state, all closed by default on mobile
 const panelOpen = ref(false)
 const colorOpen = ref(false)
 const ratingOpen = ref(false)
 const priceOpen = ref(false)
 
-// Keep min <= max + sync
+// Keep min and max price synchronized so min value cannot be bigger than max and vice-versa
 const syncPrices = () => {
   if (priceMinLocal.value > priceMaxLocal.value) {
     [priceMinLocal.value, priceMaxLocal.value] = [priceMaxLocal.value, priceMinLocal.value]
@@ -90,7 +91,7 @@ const resetFilters = () => {
     priceMax: props.maxPrice,
     minRating: 1
   }
-  
+
   priceMinLocal.value = props.minPrice;
   priceMaxLocal.value = props.maxPrice;
   minRatingLocal.value = 1;
@@ -144,10 +145,13 @@ const resetFilters = () => {
 
           <div :class="['overflow-hidden transition-all duration-300', colorOpen ? 'max-h-72' : 'max-h-0 lg:max-h-72']">
             <div class="space-y-2 max-h-60 overflow-y-auto pr-2">
-              <label v-for="color in availableColors" :key="color" class="flex items-center cursor-pointer group">
+              <label v-for="color in availableColors" :key="color" :for="`color-${color}`"
+                class="flex items-center cursor-pointer group gap-2">
+                <span class="w-4 h-4 rounded-full border border-gray-300 shrink-0"
+                  :style="{ backgroundColor: getColor(color) }" />
                 <input type="checkbox" :id="`color-${color}`" :value="color" v-model="filters.colors"
                   class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
-                <span class="ml-2 text-sm text-gray-700 group-hover:text-indigo-700 transition-colors">
+                <span class="text-sm text-gray-700 group-hover:text-indigo-700 transition-colors">
                   {{ color }}
                 </span>
               </label>
@@ -207,7 +211,7 @@ const resetFilters = () => {
             </div>
 
             <div class="flex justify-between text-sm text-gray-700 mt-3 font-medium">
-              <span>${{ priceMinLocal }}</span>
+              <span>${{ priceMinLocal }}{{ }}</span>
               <span>${{ priceMaxLocal }}</span>
             </div>
 
